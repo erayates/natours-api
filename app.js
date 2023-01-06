@@ -24,6 +24,8 @@ app.use(express.json())
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`));
 
 
+// GET Request
+
 app.get('/api/v1/tours', (req,res) => {
     res.status(200).json({
         status: 'success',
@@ -33,6 +35,9 @@ app.get('/api/v1/tours', (req,res) => {
         }
     })
 })
+
+
+// GET Request with ID
 
 app.get('/api/v1/tours/:id', (req,res) => {
     console.log(req.params)
@@ -52,7 +57,7 @@ app.get('/api/v1/tours/:id', (req,res) => {
 
 
 
-
+// POST Request
 
 app.post('/api/v1/tours', (req,res) => {
     const newId = tours[tours.length - 1].id + 1;
@@ -70,6 +75,47 @@ app.post('/api/v1/tours', (req,res) => {
 
     // Always send a response
 })
+
+
+// PATCH REQUEST
+app.patch('/api/v1/tours/:id', (req,res) => {
+    if(req.params.id > tours.length - 1) return res.status(404).json({
+        status: 'fail',
+        message: 'There is no tour with that ID.'
+        
+    })
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            tour: '<Update tour here...>'
+        }
+    })
+})
+
+// DELETE REQUEST
+app.delete('/api/v1/tours/:id', (req,res) => {
+    if(req.params.id > tours.length - 1) return res.status(404).json({
+        status: 'fail',
+        message: 'There is no tour with that ID.'
+        
+    })
+
+    res.status(204).json({ // 204 means no content
+        status: 'success',
+        data: null
+    })
+    console.log(req.params)
+})
+
+
+
+
+
+
+
+
+
 
 
 app.listen(port,() => {
