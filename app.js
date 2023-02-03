@@ -1,9 +1,14 @@
 const express = require('express');
 const app = express();
-const fs = require('fs');
 
-const port = 3000;
+const morgan = require('morgan');
 
+const tourRouter = require('./routes/tourRoutes');
+const userRouter = require('./routes/userRoutes');
+
+
+// 1) MIDDLEWARES
+app.use(morgan('dev'))
 
 app.use(express.json());
 
@@ -15,117 +20,18 @@ app.use((req,res,next) => {
 app.use((req,res,next) => {
     req.requestTime = new Date().toUTCString();
     next();    
-})
+});
 
 
-const tours = JSON.parse(fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`));
+// 2) ROUTE HANDLERS
+// They are now in controllers folder
 
+// 3) ROUTES
+// They are now in routes folder
 
-// GET Request
+app.use('/api/v1/tours',tourRouter); // These middlewares goes into middleware stack
+app.use('/api/v1/users',userRouter); // When these middlewares are called, they will be executed in order
 
-const getAllTours = (req,res) => {
-    console.log(req.requestTime);
-    res.status(200).json({
-        status: 'success',
-        requestedAt: req.requestTime,
-        results: tours.length,
-        data: {
-            tours
-        }
-    })
-}
+// 4) START SERVER
 
-// GET Request with ID
-
-const getTour = (req,res) => {
-    const tour = tours.find(el => el.id === parseInt(req.params.id));
-    if(!tour) return res.status(404).json({
-        status: 'fail',
-        message: 'There is no tour with that ID.'
-    })
-    res.status(200).json({
-        status: 'success',
-        data: {
-            tour
-        }
-    })
-}
-
-// POST Request
-
-const createTour = (req,res) => {
-    const newId = tours[tours.length - 1].id + 1;
-    const newTour = Object.assign({id: newId}, req.body);
-
-    tours.push(newTour);
-    fs.writeFile(`${__dirname}/dev-data/data/tours-simple.json`, JSON.stringify(tours), err => {
-        res.status(201).json({
-            status: 'success',
-            data: {
-                tour: newTour
-            }
-        })
-    })
-}
-
-// PATCH REQUEST
-
-const updateTour = (req,res) => {
-    if(req.params.id > tours.length - 1) return res.status(404).json({
-        status: 'fail',
-        message: 'There is no tour with that ID.'
-    })
-    res.status(200).json({
-        status: 'success',
-        data: {
-            tour: '<Update tour here...>'
-        }
-    })
-}
-
-
-
-
-const deleteTour = (req,res) => {
-    if(req.params.id > tours.length - 1) return res.status(404).json({
-        status: 'fail',
-        message: 'There is no tour with that ID.'
-    })
-    res.status(204).json({
-        status: 'success',
-        data: null
-    })
-}
-
-
-// app.get('/api/v1/tours', getAllTours)
-
-app.get('/api/v1/tours/:id', getTour)
-
-// app.post('/api/v1/tours', createTour);
-
-app.patch('/api/v1/tours/:id', updateTour);
-
-app.delete('/api/v1/tours/:id', deleteTour)
-
-app
-    .route('/api/v1/tours')
-    .get(getAllTours)
-    .post(createTour)
-    
-app
-    .route('/api/v1/tours/:id')
-    .get(getTour)
-    .patch(updateTour)
-    .delete(deleteTour)
-    
-    
-
-
-
-
-
-
-app.listen(port,() => {
-    console.log(`App running on port ${port}...`)
-})
+module.exports = app;
