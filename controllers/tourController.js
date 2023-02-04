@@ -1,4 +1,5 @@
 const fs = require('fs');
+
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`));
 
 exports.getAllTours = (req,res) => {
@@ -33,7 +34,7 @@ exports.checkBody = (req,res,next) => {
 // GET Request with ID
 
 exports.getTour = (req,res) => {
-    // const tour = tours.find(el => el.id === parseInt(req.params.id));
+    const tour = tours.find(el => el.id === parseInt(req.params.id));
     // if(!tour) return res.status(404).json({
     //     status: 'fail',
     //     message: 'There is no tour with that ID.'
