@@ -3,7 +3,7 @@ const tourController = require('./../controllers/tourController');
 const router = express.Router();
 
 
-router.param('id', tourController.checkID)
+// router.param('id', tourController.checkID)
 
 // Create a checkBody middleware
 // Check if body contains the name and price property
@@ -18,7 +18,7 @@ router.param('id', tourController.checkID)
 router
     .route('/')
     .get(tourController.getAllTours)
-    .post(tourController.checkBody,tourController.createTour) // This is a middleware stack (chaining multiple middleware functions)
+    .post(tourController.createTour) // This is a middleware stack (chaining multiple middleware functions) // tourController.checkBody deleted.
     // First tourController.checkBody is executed, then tourController.createTour
     // If tourController.checkBody returns next(), then tourController.createTour is executed
     
