@@ -3,9 +3,18 @@ const Tour = require('./../models/tourModel');
 
 // const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`));
 
+exports.aliasTopTours = async(req,res,next) => {
+    req.query.limit = '5';
+    req.query.sort = '-ratingsAverage,price';
+    req.query.fields = 'name,price,ratingsAverage, summary, difficulty';
+    next();
+}
+
+
 exports.getAllTours = async (req,res) => {
     try{
         // BUILD QUERY
+
         // 1) Filtering
         const queryObj = {...req.query};
         const excludedFields = ['page', 'sort', 'limit', 'fields'];
@@ -20,9 +29,10 @@ exports.getAllTours = async (req,res) => {
         queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
 
         // 3) Sorting
+      
         let query = Tour.find(JSON.parse(queryStr));
         if(req.query.sort){
-            const sortBy = req.query.sort().split(',').join(' ');
+            const sortBy = req.query.sort.split(',').join(' ');
             query = query.sort(sortBy);
 
         }else{
@@ -37,6 +47,25 @@ exports.getAllTours = async (req,res) => {
             query = query.select('-__v');
         }
 
+        // 5) Pagination
+        const page = req.query.page * 1 || 1;
+        const limit = req.query.limit * 1 || 100;
+        const skip = (page - 1) * limit;
+
+        query = query.skip(skip).limit(limit);
+
+        if(req.query.page){
+            const numTours = await Tour.countDocuments(); // Tour.countDocuments() ile toplam tour sayısı bulunur. Bir promise dönderir, o yüzden await kullanılır.
+            if(skip >= numTours) throw new Error('This page does not exists.'); // Direkt olarak res.status.404 yani catch bloğuna gider.
+        }
+
+        // 6) Aliasing
+
+
+
+
+        // the text has special characters think how you can just get only the words
+        // ["I", "love", "teaching", "and", "empowering", "people.", "I", "teach", "HTML,", "CSS,", "JS,", "React,", "Python"]
         // const query = Tour.find(JSON.parse(queryStr))
         
 
@@ -54,7 +83,7 @@ exports.getAllTours = async (req,res) => {
     }catch(err){
         res.status(404).json({
             status: 'fail',
-            message: "There is no tour to be displayed."
+            message: err
         })
     }
 
