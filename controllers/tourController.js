@@ -11,9 +11,6 @@ exports.aliasTopTours = async(req,res,next) => {
     next();
 }
 
-
-
-
 exports.getAllTours = async (req,res) => {
     try{
         // EXECUTE QUERY
@@ -23,8 +20,7 @@ exports.getAllTours = async (req,res) => {
             .limitFields()
             .pagination();
         const tours = await features.query;
-
-
+        
         res.status(200).json({
             status: 'success',
             results: tours.length,
@@ -38,8 +34,6 @@ exports.getAllTours = async (req,res) => {
             message: err
         })
     }
-
- 
 }
 
 // exports.checkID = (req, res, next, val)=> {
@@ -99,7 +93,7 @@ exports.createTour = async (req,res) => {
     }catch(err){
         res.status(400).json({
             status: 'fail',
-            message: "Invalid data sent!"
+            message: err
         })
     }
    
