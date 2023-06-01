@@ -1,36 +1,43 @@
-const fs = require('fs');
+const User = require('../models/userModel');
+const catchAsync = require('../utilities/catchAsync');
 
-const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`));
 
-exports.getAllUsers = (req,res) => {
+
+exports.getAllUsers = catchAsync(async (req, res, next) => {
+    const users = await User.find();
+    res.status(200).json({
+        status: 'success',
+        results: users.length,
+        data: {
+            users
+        }
+    })
+
+
+})
+
+exports.getUser = (req, res) => {
     res.status(500).json({
-        status:'error',
+        status: 'error',
         message: 'This route is not defined yet!'
     })
 }
 
-exports.getUser = (req,res) => {
+exports.createUser = (req, res) => {
     res.status(500).json({
-        status:'error',
+        status: 'error',
         message: 'This route is not defined yet!'
     })
 }
 
-exports.createUser = (req,res) => {
+exports.updateUser = (req, res) => {
     res.status(500).json({
-        status:'error',
+        status: 'error',
         message: 'This route is not defined yet!'
     })
 }
 
-exports.updateUser = (req,res) => {
-    res.status(500).json({
-        status:'error',
-        message: 'This route is not defined yet!'
-    })
-}
-
-exports.deleteUser = (req,res) => {
+exports.deleteUser = (req, res) => {
     res.status(500).json({
         status: 'error',
         message: 'This route is not defined yet!'

@@ -1,6 +1,7 @@
 const express = require('express');
-
 const tourController = require('../controllers/tourController');
+const authController = require('../controllers/authController');
+
 
 const router = express.Router();
 
@@ -27,13 +28,9 @@ router
     .route('/tour-stats')
     .get(tourController.getTourStats)
 
-
-
-
-
 router
     .route('/')
-    .get(tourController.getAllTours)
+    .get(authController.protect, tourController.getAllTours)
     .post(tourController.createTour) // This is a middleware stack (chaining multiple middleware functions) // tourController.checkBody deleted.
     // First tourController.checkBody is executed, then tourController.createTour
     // If tourController.checkBody returns next(), then tourController.createTour is executed
