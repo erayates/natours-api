@@ -36,6 +36,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please confirm your password."],
     validate: {
+      // This only works on CREATE and SAVE
       validator: function (el) {
         return el === this.password;
       },
@@ -45,6 +46,11 @@ const userSchema = new mongoose.Schema({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
+  active:{
+    type: Boolean,
+    default: true,
+    select: false
+  }
 });
 
 userSchema.pre('save', async function (next) {
@@ -61,12 +67,26 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
+userSchema.pre('save', function (next) {
+  if (!this.isModified('password') || this.isNew) return next();
+  
+  this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
+
+userSchema.pre(/^find/, function(next){ // we used regex to find all the find methods -> find, findOne, findOneAndUpdate, findOneAndDelete etc.
+  // this points to the current query
+  this.find({active: {$ne: false}});
+  next();
+})
+
+
 
 userSchema.methods.correctPassword = async function (candidatePassword, userPassword) {
   return await bcrypt.compare(candidatePassword, userPassword);
 }
 
-userSchema.methods.changesPasswordAfter = function (JWTTimeStamp) {
+userSchema.methods.changedPasswordAfter = function (JWTTimeStamp) {
   if (this.passwordChangedAt) {
     const changedTimeStamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
     return JWTTimeStamp < changedTimeStamp; // if true means that changed
