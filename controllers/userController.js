@@ -13,7 +13,6 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
         }
     })
 
-
 })
 
 exports.getUser = (req, res) => {
