@@ -39,7 +39,7 @@ const tourSchema = new mongoose.Schema({
         max: [5, 'Rating must be below 5.0'],
 
     },
-    ratingsQuantity:{
+    ratingsQuantity: {
         type: Number,
         default: 0
     },
@@ -50,7 +50,7 @@ const tourSchema = new mongoose.Schema({
     priceDiscount: {
         type: Number,
         validate: {
-            validator: function(val){
+            validator: function (val) {
                 // this only points to current doc on NEW document creation (will not work on UPDATE)
                 return val < this.price;
             },
@@ -81,33 +81,57 @@ const tourSchema = new mongoose.Schema({
     secretTour: {
         type: Boolean,
         default: false
-    }
-},{
-    toJSON: {virtuals: true},
-    toObject: {virtuals: true}
+    },
+    startLocation: {
+        type: {
+            type: String,
+            default: 'Point',
+            enum: ['Point']
+        },
+        coordinates: [Number], // [longitude, latitude]
+        address: String,
+        description: String,
+
+    },
+    locations: [
+        {
+         type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point']  
+         },
+         coordinates: [Number],
+         address: String,
+         description: String,
+         day: Number
+        }
+    ]
+}, {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
 })
 
-tourSchema.virtual('durationWeeks').get(function(){return this.durations / 7});
+tourSchema.virtual('durationWeeks').get(function () { return this.durations / 7 });
 
 // Document middleware: runs before .save() and .create() but not on insertMany() trigger the save method
-tourSchema.pre('save', function(next){
-    this.slug = slugify(this.name, {lower: true});
+tourSchema.pre('save', function (next) {
+    this.slug = slugify(this.name, { lower: true });
     next();
 })
 
-tourSchema.post('save', function(doc,next){
+tourSchema.post('save', function (doc, next) {
     console.log(doc);
     next();
 })
 
 // Query Middleware
-tourSchema.pre(/^find/, function(next){
-    this.find({secretTour: {$ne: true}});
+tourSchema.pre(/^find/, function (next) {
+    this.find({ secretTour: { $ne: true } });
     this.start = Date.now();
     next();
 })
 
-tourSchema.post(/^find/, function(docs,next){
+tourSchema.post(/^find/, function (docs, next) {
     // console.log(docs)
     console.log(`Query took ${Date.now() - this.start} milliseconds`);
     next();
@@ -115,16 +139,16 @@ tourSchema.post(/^find/, function(docs,next){
 
 
 // Aggregation Middleware
-tourSchema.pre('aggregate', function(next){
-    this.pipeline().unshift({$match: {$secretTour: {$ne: true}}});
-    
+tourSchema.pre('aggregate', function (next) {
+    this.pipeline().unshift({ $match: { $secretTour: { $ne: true } } });
+
     console.log(this.pipeline());
     next();
 })
 
 // tourSchema.pre('findOne', function(next){ // Tekli turda arama yaptığımızda getAllTour değil getTour middleware'ı çalışır. Bu yüzden secretTour'lar ortaya çıkabilir.
-    // this.find({secretTour} : {$ne: true});
-    //next();
+// this.find({secretTour} : {$ne: true});
+//next();
 // })
 
 const Tour = mongoose.model('Tour', tourSchema);
