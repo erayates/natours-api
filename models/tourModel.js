@@ -105,6 +105,19 @@ const tourSchema = new mongoose.Schema({
          description: String,
          day: Number
         }
+    ],
+    // guides: Array,
+    guides: [
+        {
+            type: mongoose.Schema.ObjectId,
+            ref: 'User'
+        }
+    ],
+    reviews:[
+        {
+            type: mongoose.Schema.ObjectId,
+            ref: 'Review',
+        }
     ]
 }, {
     toJSON: { virtuals: true },
@@ -113,11 +126,27 @@ const tourSchema = new mongoose.Schema({
 
 tourSchema.virtual('durationWeeks').get(function () { return this.durations / 7 });
 
+
+// Virtual Populate
+tourSchema.virtual('reviews',{
+    ref: 'Review',
+    foreignField: 'tour',
+    localField: '_id'    
+})
+
+
 // Document middleware: runs before .save() and .create() but not on insertMany() trigger the save method
 tourSchema.pre('save', function (next) {
     this.slug = slugify(this.name, { lower: true });
     next();
 })
+
+tourSchema.pre('save', async function(next) {
+    const guidesPromises = this.guides.map(async id => await User.findById(id));
+    this.guides = await Promise.all(guidesPromises);
+    next();
+})
+
 
 tourSchema.post('save', function (doc, next) {
     console.log(doc);
@@ -128,6 +157,15 @@ tourSchema.post('save', function (doc, next) {
 tourSchema.pre(/^find/, function (next) {
     this.find({ secretTour: { $ne: true } });
     this.start = Date.now();
+    next();
+})
+
+tourSchema.pre(/^find/, function(next){
+    this.populate({
+        path: 'guides',
+        select: '-__v -passwordChangedAt'
+    })
+
     next();
 })
 
@@ -152,8 +190,5 @@ tourSchema.pre('aggregate', function (next) {
 // })
 
 const Tour = mongoose.model('Tour', tourSchema);
-
-
-
 
 module.exports = Tour;

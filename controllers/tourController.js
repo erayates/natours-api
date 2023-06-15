@@ -68,7 +68,8 @@ exports.getTour = catchAsync (async (req,res,next) => {
     //     message: 'There is no tour with that ID.'
     // })
 
-    const tour = await Tour.findById(req.params.id)
+    const tour = await Tour.findById(req.params.id).populate('reviews');
+
     if(!tour){
         return next(new AppError('There is no tour with that ID.', 404));
     }
@@ -91,8 +92,6 @@ exports.getTour = catchAsync (async (req,res,next) => {
 });
 
 // POST Request
-
-
 
 exports.createTour = catchAsync(async (req,res,next) => {
     const newTour = await Tour.create(req.body)
