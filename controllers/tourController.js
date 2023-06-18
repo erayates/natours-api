@@ -6,6 +6,8 @@ const catchAsync = require('../utilities/catchAsync');
 
 const AppError = require('../utilities/appError');
 
+const factory = require('./handleFactory');
+
 // const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`));
 
 exports.aliasTopTours = async(req,res,next) => {
@@ -131,53 +133,8 @@ exports.createTour = catchAsync(async (req,res,next) => {
 
 // PATCH REQUEST
 
-exports.updateTour = catchAsync(async (req,res,next) => {
-    const tour = Tour.findByIdAndUpdate(req.params.id, req.body, {
-        new: true,
-        runValidators: true // Şemada bulunan validatorları çalıştırır. (price, number olmak zorunda gibi)
-    })
-
-    if(!tour){
-        return next(new AppError('There is no tour with that ID.', 404));
-    }
-
-    res.status(200).json({
-        status: 'success',
-        data: {
-            tour
-        }
-    })
-    
-    // try{
-
-    // }catch(err){
-    //     res.status(404).json({
-    //         status: 'fail',
-    //         message: 'There is no tour with that ID.'
-    //     })
-    // }
-
-});
-
-exports.deleteTour = catchAsync (async (req,res,next) => {
-    const tour = await Tour.findByIdAndDelete(req.params.id)
-    if(!tour){
-        return next(new AppError('There is no tour with that ID.', 404));
-    }
-    
-    res.status(204).json({
-        status: 'success',
-        data: null
-    })
-    // try{ 
-       
-    // }catch(err){
-    //     res.status(404).json({
-    //         status: 'fail',
-    //         message: 'There is no tour with that ID.'
-    //     })
-    // }
-});
+exports.updateTour = factory.updateOne(Tour);
+exports.deleteTour = factory.deleteOne(Tour);
 
 // Aggregation Pipeline
 exports.getTourStats = catchAsync (async (req,res) => {

@@ -8,8 +8,17 @@ const router = express.router({ mergeParams: true});
 router
     .route('/')
     .get(reviewController.getAllReviews)
-    .post(authController.protect,authController.restrictTo('user'), reviewController.createReview);
+    .post(
+        authController.protect,
+        authController.restrictTo('user'), 
+        reviewController.createReview
+    );
 
+
+router
+    .route('/:id')
+    .delete(reviewController.deleteReview)
+    .patch(reviewController.updateReview)
 
 
 
