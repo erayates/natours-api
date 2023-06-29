@@ -1,3 +1,4 @@
+const User = require("../models/userModel");
 const APIFeatures = require("../utilities/apiFeatures");
 const AppError = require("../utilities/appError");
 const catchAsync = require("../utilities/catchAsync");
@@ -44,6 +45,7 @@ exports.createOne = Model => catchAsync(async (req,res,next) => {
     })
 });
 
+
 exports.getOne = (Model, popOptions) => catchAsync (async (req,res,next) => {
     let query = await Model.findById(req.params.id);
     if(popOptions) query = query.populate(popOptions);
@@ -86,4 +88,5 @@ exports.getAll = Model => catchAsync(async (req,res) => {
      })
   
 });
+
 

@@ -24,7 +24,13 @@ router
     .get(tourController.aliasTopTours, tourController.getAllTours)
 
 
-router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
+router
+    .route('/monthly-plan/:year')
+    .get(
+        authController.protect,
+        authController.restrictTo('admin', 'lead-guide', 'guide'),
+        tourController.getMonthlyPlan
+    );
 
 
 
@@ -34,8 +40,12 @@ router
 
 router
     .route('/')
-    .get(authController.protect, tourController.getAllTours)
-    .post(tourController.createTour) // This is a middleware stack (chaining multiple middleware functions) // tourController.checkBody deleted.
+    .get(tourController.getAllTours)
+    .post(
+        authController.protect,
+        authController.restrictTo('admin', 'lead-guide'),
+        tourController.createTour
+    ) // This is a middleware stack (chaining multiple middleware functions) // tourController.checkBody deleted.
 // First tourController.checkBody is executed, then tourController.createTour
 // If tourController.checkBody returns next(), then tourController.createTour is executed
 
@@ -43,7 +53,11 @@ router
 router
     .route('/:id')
     .get(tourController.getTour)
-    .patch(tourController.updateTour)
+    .patch(
+        authController.protect,
+        authController.restrictTo('admin', 'lead-guide'),
+        tourController.updateTour
+    )
     .delete(authController.protect, authController.restrictTo('admin', 'lead-guide'), tourController.deleteTour)
 
 
